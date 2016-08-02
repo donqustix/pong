@@ -1,11 +1,10 @@
 #include <ncurses.h>
-
 #include <iostream>
 
 namespace
 {
     static constexpr int WINDOW_WIDTH = 80, WINDOW_HEIGHT = 24;
-
+    
     struct Paddle
     {
         static constexpr int height = 5;
@@ -35,8 +34,15 @@ namespace
         const auto fx = ball.x + ball.dx;
         const auto fy = ball.y + ball.dy;
 
-        if (!(::paddle_ball_collision(left_paddle, fx, fy) || ::paddle_ball_collision(right_paddle, fx, fy)))
-            ball.dx = fx ? fx == WINDOW_WIDTH  - 1 ? -1 : ball.dx : 1;
+        ball.dx = paddle_ball_collision(left_paddle, fx, fy)
+            ?    
+        ball.dx : paddle_ball_collision(right_paddle, fx, fy)
+            ?
+                ball.dx : fx
+            ?
+                fx == WINDOW_WIDTH - 1
+            ?
+                -1 : ball.dx : 1;
 
         ball.dy = fy ? fy == WINDOW_HEIGHT - 1 ? -1 : ball.dy : 1;
 
@@ -46,19 +52,19 @@ namespace
 
     void update_right_paddle() noexcept
     {
-        if (ball.x > right_paddle.x) return;
+        if (ball.x > right_paddle.x)
+            return;
 
         const auto fby = ball.y + (right_paddle.x - ball.x) * ball.dy;
 
-        if (fby >= 0 && fby < WINDOW_HEIGHT)
-        {
-            const auto half_paddle_height = Paddle::height >> 1;
-            const auto fpy = right_paddle.y +
-                (ball.y > right_paddle.y + half_paddle_height) -
-                (ball.y < right_paddle.y + half_paddle_height);
+        if (fby < 0 || fby >= WINDOW_HEIGHT)
+            return;
 
-            right_paddle.y = fpy ? fpy + Paddle::height == WINDOW_HEIGHT ? right_paddle.y : fpy : right_paddle.y;
-        }
+        const auto half_paddle_height = Paddle::height >> 1;
+        const auto fpy = right_paddle.y + (ball.y > right_paddle.y + half_paddle_height) - 
+                                          (ball.y < right_paddle.y + half_paddle_height);
+
+        right_paddle.y = fpy ? fpy + Paddle::height == WINDOW_HEIGHT ? right_paddle.y : fpy : right_paddle.y;
     }
 
     void keyboard(WINDOW* window, bool& running) noexcept
