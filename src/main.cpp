@@ -34,7 +34,7 @@ namespace
         const auto fx = ball.x + ball.dx;
         const auto fy = ball.y + ball.dy;
 
-        ball.dx = paddle_ball_collision(left_paddle, fx, fy)
+        ball.dx = paddle_ball_collision(left_paddle,  fx, fy)
             ?    
         ball.dx : paddle_ball_collision(right_paddle, fx, fy)
             ?
